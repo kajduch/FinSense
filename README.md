@@ -24,7 +24,7 @@ FinSense — это Telegram-бот для глубокого финансово
 
 ### 1. Клонирование репозитория
 ```bash
-git clone https://github.com/<your-username>/finsense.git
+git clone https://github.com/kajduch/finsense.git
 cd finsense
 ```
 
