@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>FinSense Analytics</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #111116;
+            --text-color: #ffffff;
+            --accent-cyan: #00f3ff;
+            --accent-purple: #b026ff;
+            --card-bg: #1a1a24;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 16px;
+        }
+        .summary-block {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 1px solid #333344;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #aaa;
+        }
+        .summary-value {
+            font-weight: 600;
+            color: var(--accent-cyan);
+        }
+        .negative {
+            color: #ff2a7a;
+        }
+        
+        .section-selector {
+            width: 100%;
+            padding: 12px;
+            background: var(--card-bg) url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") no-repeat right 12px center;
+            background-size: 16px;
+            color: var(--text-color);
+            border: 1px solid var(--accent-purple);
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            outline: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        .section-selector option {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            box-sizing: border-box;
+            border: 1px solid #333344;
+        }
+        
+        .list-container {
+            display: none;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #333344;
+        }
+        
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #333344;
+            font-size: 14px;
+        }
+        .list-item:last-child {
+            border-bottom: none;
+        }
+        .list-name {
+            color: #ddd;
+            flex: 1;
+            padding-right: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .list-amount {
+            font-weight: bold;
+            color: var(--text-color);
+        }
+        .loading { text-align: center; margin-top: 50px; color: var(--accent-cyan); }
+        .error-log { color: #ff2a7a; text-align: center; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">Загрузка данных...</div>
+    
+    <div id="content" style="display: none;">
+        <div class="summary-block" id="summary">
+            <!-- Заполняется через JS -->
+        </div>
+
+        <select class="section-selector" id="section-select">
+            <option value="categories">Категории расходов</option>
+            <option value="balance">Динамика баланса</option>
+            <option value="payees">Топ получателей</option>
+        </select>
+
+        <!-- График категорий -->
+        <div id="view-categories">
+            <div class="chart-container">
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
+
+        <!-- График баланса -->
+        <div id="view-balance" style="display: none;">
+            <div class="chart-container">
+                <canvas id="lineChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Списки получателей -->
+        <div id="view-payees" class="list-container">
+            <h3>🏢 Организации</h3>
+            <div id="org-list"></div>
+            <div class="list-item" style="border-top: 2px solid #00f3ff; margin-top: 5px;">
+                <span class="list-name" style="color: var(--accent-cyan); font-weight:bold;">Итого:</span>
+                <span class="list-amount" id="org-total">0 ₽</span>
+            </div>
+            
+            <h3 style="margin-top: 20px;">👤 Переводы людям</h3>
+            <div id="person-list"></div>
+            <div class="list-item" style="border-top: 2px solid #00f3ff; margin-top: 5px;">
+                <span class="list-name" style="color: var(--accent-cyan); font-weight:bold;">Итого:</span>
+                <span class="list-amount" id="person-total">0 ₽</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        let pieChart, lineChart;
+
+        function formatMoney(amount) {
+            return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
+        }
+
+        // --- В ЭТУ ПЕРЕМЕННУЮ БОТ БУДЕТ ВСТАВЛЯТЬ ДАННЫЕ ПРИ СОЗДАНИИ СТРАНИЦЫ ---
+        window.INITIAL_DATA = null;
+
+        function initApp() {
+            try {
+                if (!window.INITIAL_DATA) {
+                    throw new Error("Данные не встроены в страницу.");
+                }
+                
+                if (typeof window.INITIAL_DATA === 'string' && window.INITIAL_DATA.startsWith('ERROR:')) {
+                    throw new Error(window.INITIAL_DATA);
+                }
+                
+                renderApp(window.INITIAL_DATA);
+            } catch (e) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'none';
+                const errDiv = document.createElement('div');
+                errDiv.className = 'error-log';
+                errDiv.innerHTML = `<h3>Ошибка загрузки:</h3><p>${e.message}</p>`;
+                document.body.appendChild(errDiv);
+            }
+        }
+
+        function renderApp(data) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+
+            // 1. Сводный блок
+            document.getElementById('summary').innerHTML = `
+                <div class="summary-item"><span>Период:</span> <span class="summary-value" style="color: white;">${data.period}</span></div>
+                <div class="summary-item"><span>Всего поступлений:</span> <span class="summary-value">${formatMoney(data.total_income)}</span></div>
+                <div class="summary-item"><span>Всего расходов:</span> <span class="summary-value negative">${formatMoney(data.total_expenses)}</span></div>
+                <div class="summary-item"><span>Начальный остаток:</span> <span class="summary-value" style="color: white;">${formatMoney(data.initial_balance)}</span></div>
+                <div class="summary-item"><span>Конечный остаток:</span> <span class="summary-value" style="color: white;">${formatMoney(data.final_balance)}</span></div>
+                <div class="summary-item"><span>Количество операций:</span> <span class="summary-value" style="color: white;">${data.operations_count}</span></div>
+            `;
+
+            // 2. Круговая диаграмма (Категории)
+            const ctxPie = document.getElementById('pieChart').getContext('2d');
+            
+            // Считаем суммы по категориям
+            let catSums = {};
+            (data.transactions || []).forEach(t => {
+                if (t.Amount < 0) {
+                    let cat = t.Category || 'Неизвестно';
+                    catSums[cat] = (catSums[cat] || 0) + Math.abs(t.Amount);
+                }
+            });
+            
+            let catLabels = Object.keys(catSums);
+            let catValues = Object.values(catSums);
+            let totalExp = catValues.reduce((a,b)=>a+b, 0);
+
+            pieChart = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: catLabels,
+                    datasets: [{
+                        data: catValues,
+                        backgroundColor: ['#b026ff', '#00f3ff', '#ff2a7a', '#00ff7f', '#ffd700', '#ff8c00', '#555555'],
+                        borderWidth: 2,
+                        borderColor: '#111116'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#fff', font: {size: 10} } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let val = context.raw;
+                                    let perc = totalExp > 0 ? ((val/totalExp)*100).toFixed(1) : 0;
+                                    return ` ${formatMoney(val)} (${perc}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 3. Линейный график (Динамика)
+            const ctxLine = document.getElementById('lineChart').getContext('2d');
+            
+            let dailyBal = {};
+            let currentBal = data.initial_balance || 0;
+            let sortedDates = [...new Set((data.transactions || []).map(t => t.Date))].sort();
+            
+            let lineDates = [];
+            let lineBalances = [];
+            
+            sortedDates.forEach(d => {
+                let daySum = data.transactions.filter(t => t.Date === d).reduce((sum, t) => sum + (t.Amount || 0), 0);
+                currentBal += daySum;
+                lineDates.push(d || 'Неизв.');
+                lineBalances.push(currentBal);
+            });
+
+            lineChart = new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: lineDates,
+                    datasets: [{
+                        label: 'Баланс',
+                        data: lineBalances,
+                        borderColor: '#00f3ff',
+                        backgroundColor: 'rgba(176, 38, 255, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#aaa', maxTicksLimit: 5 }, grid: { color: '#333344' } },
+                        y: { ticks: { color: '#aaa' }, grid: { color: '#333344' } }
+                    }
+                }
+            });
+
+            // 4. Топ получателей
+            let orgs = {};
+            let persons = {};
+            
+            (data.transactions || []).forEach(t => {
+                if (t.Amount < 0) {
+                    let payee = String(t.Description || 'Неизвестно');
+                    let amt = Math.abs(t.Amount);
+                    if (t.PayeeType === 'Человек') {
+                        persons[payee] = (persons[payee] || 0) + amt;
+                    } else {
+                        orgs[payee] = (orgs[payee] || 0) + amt;
+                    }
+                }
+            });
+
+            function renderList(dict, containerId, totalId) {
+                let sorted = Object.entries(dict).sort((a,b) => b[1] - a[1]).slice(0, 5);
+                let html = '';
+                let total = 0;
+                sorted.forEach(item => {
+                    let name = String(item[0]).replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    html += `<div class="list-item"><span class="list-name">${name}</span><span class="list-amount">${formatMoney(item[1])}</span></div>`;
+                    total += item[1];
+                });
+                document.getElementById(containerId).innerHTML = html || '<div class="list-item">Нет данных</div>';
+                document.getElementById(totalId).innerText = formatMoney(total);
+            }
+
+            renderList(orgs, 'org-list', 'org-total');
+            renderList(persons, 'person-list', 'person-total');
+        }
+
+        // Переключение вкладок
+        document.getElementById('section-select').addEventListener('change', function(e) {
+            let val = e.target.value;
+            document.getElementById('view-categories').style.display = val === 'categories' ? 'block' : 'none';
+            document.getElementById('view-balance').style.display = val === 'balance' ? 'block' : 'none';
+            document.getElementById('view-payees').style.display = val === 'payees' ? 'block' : 'none';
+        });
+
+        initApp();
+    </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+# Environments & secrets
+.env
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Logs & temp
+*.log
+tunnel_url.txt
+test_pdf.txt
+
+# Binary and helper scrap scripts
+cloudflared*
+patch_*.py
+clean_*.py
+fix_*.py
+revert_*.py
+rewrite_*.py
+test_*.py
+bot_backup*
+bot_clean*
+bot_rollback*
+
+# OS files
+.DS_Store
+Thumbs.db
