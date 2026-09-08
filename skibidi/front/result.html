@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+body {
+  margin-right: 180px;
+  margin-left: 180px;
+  background-image: url('Group14.png');
+  background-size: 1400px auto;
+  font-family: 'Inter', sans-serif;
+  background-color: #0b0c10;
+  color: #ffffff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Оставляем! */
+  overflow-x: hidden;
+}
+.flex-child {
+  min-width: 0; /* Заставляет flex-элемент уважать границы родителя */
+}
+
+    header {
+      width: 100%;
+      max-width: 1400px;
+      padding: 20px 32px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+  
+    .logo {
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      padding: 8px 24px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+      cursor: pointer;
+      display: inline-block;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      user-select: none;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .nav-link {
+      color: #FFFFFF;
+      text-decoration: none;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .nav-link:hover {
+      color: #00d2ff;
+      transform: translateY(-2px);
+    }
+
+    .nav-link:active {
+      transform: translateY(0) scale(0.95);
+      color: #ffffff;
+    }
+
+    .btn-tg {
+      border: 2px solid #FAFAFA;
+      padding: 9.14px 24.39px 9.14px 24.39px;
+      border-radius: 50px;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .btn-tg:hover {
+      border-color: transparent;
+      background: linear-gradient(135deg, rgba(0,210,255,0.15), rgba(58,123,213,0.15), rgba(157,78,204,0.15)) padding-box,
+                  linear-gradient(135deg, #00d2ff, #3a7bd5, #9d4ecc) border-box;
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 8px 25px rgba(58, 123, 213, 0.35);
+    }
+
+    .btn-tg:active {
+      transform: translateY(0) scale(0.95);
+      box-shadow: 0 2px 10px rgba(58, 123, 213, 0.2);
+    }
+
+
+    main {
+  width: 100%;
+  background:transparent;
+  background-size: 1400px auto;
+  font-family: 'Inter', sans-serif;
+  color: #ffffff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  
+
+    }
+
+    .footer {
+  width: 100%;
+  background-color: transparent; /* Полностью прозрачный фон */
+  padding: 40px 0;
+  box-sizing: border-box;
+}
+
+.footer-container {
+  max-width: 1280px; /* или ширина вашего контейнера */
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.footer-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 22px;
+  font-family: 'Vela Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  border-radius: 9999px;
+  line-height: 1;
+  user-select: none;
+}
+
+/* Текст справа */
+.footer-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  text-align: right;
+  font-family: 'Vela Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.45);/* приглушенный серый оттенок */
+}
+.arrow-svg {
+  position: absolute;
+  width: 90px;                       /* масштабируем под размер промежутка */
+  height: auto;
+  left: 50%;
+  top: 55%;
+  /* Центрирование на стыке, доворот на нужный угол и наклон кончика вправо */
+  transform: translate(20%, -10%) rotate(2deg) scaleX(1);
+  z-index: 1;                        /* под карточками */
+  pointer-events: none;}
+
+
+/* Внешний ряд на 100% ширины окна */
+.ai-finance-banner {
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  
+  /* 0 слева прижимает заголовок к левому краю экрана;
+     справа отступ 40px, чтобы карточка не липла к правому краю */
+  padding: 30px 10px 30px 0;
+  box-sizing: border-box;
+  margin-left: 90px;
+  margin-right: 90px;
+}
+
+/* Заголовок: фиксированный, не сжимается */
+.ai-finance-banner {
+  width: 100%;
+  max-width: 1400px;           /* Совпадает с вашей сеткой и фоном */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 24px 32px;
+  box-sizing: border-box;
+}
+
+/* 1. Заголовок: не сжимается, держит свои 3 строки слева */
+.ai-finance-title {
+  flex: 0 0 380px;             /* Четко держит левую сторону */
+  margin: 0;
+  font-size: clamp(26px, 2.5vw, 38px);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+/* 2. Карточка: РАСТЯГИВАЕТСЯ на всё свободное пространство вправо */
+.ai-advice-card {
+  flex: 1 1 auto;              /* Забирает ВСЁ место до правого края контейнера */
+  min-width: 0;                /* Не дает тексту выдавить карточку за экран */
+  position: relative;
+  background: transparent;
+  border-radius: 28px;
+  padding: 24px 28px;
+  box-sizing: border-box;
+  
+}
+
+/* Градиентная рамка карточки */
+.ai-advice-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  padding: 1.5px;
+  background: linear-gradient(100deg, #27DFFF 0%, #4B6FFD 50%, #8929FF 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.ai-card-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.ai-card-icon {
+  flex-shrink: 0;
+}
+
+.ai-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  background: linear-gradient(90deg, #27DFFF 0%, #4B6FFD 50%, #8929FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ai-card-text {
+  margin: 0;
+  color: #f1f5f9;
+  font-size: 15px;
+  line-height: 1.5;
+  word-wrap: break-word;       /* Перенос строк */
+}
+
+.analytics-section {
+  width: 100%;
+  max-width: 100%;
+  margin-left: 0;
+  margin-bottom: 34px;
+  margin-top: 34px;
+  box-sizing: border-box;
+  display: block
+  
+  
+}
+
+/* 1. Ряд с кнопками-таблетками */
+.category-tabs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  padding: 0;
+}
+
+/* Базовый вид неактивной кнопки */
+.tab-btn {
+  background: transparent;
+  color: #e2e8f0;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 8px 22px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.25s ease;
+  position: relative !important;
+}
+
+.tab-btn:hover {
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+/* Активная кнопка с градиентным бордером и неоновым текстом */
+/* 2. Активная кнопка (текст) */
+.tab-btn.active {
+  position: relative !important;
+  border-color: transparent !important; /* Прячем базовую белую границу */
+  
+  /* Градиентный текст */
+  background: linear-gradient(90deg, #27dfff 0%, #8929ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.tab-btn.active::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  padding: 1.5px; /* Толщина рамки */
+  background: linear-gradient(90deg, #27dfff 0%, #4b6ffd 50%, #8929ff 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* 2. Тёмная карточка графика */
+.chart-card {         /* Занимает всю ширину analytics-section */
+  padding: 24px 20px 10px 20px; 
+  width: 100%;
+  background: rgba(113, 113, 113, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(3px);
+  border-radius: 24px;
+  padding: 24px 28px;
+  box-sizing: border-box;
+  display: flex;
+  position: relative;
+
+}
+
+/* Заголовок внутри карточки */
+.chart-title {
+  margin: 0 0 16px 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+/* Поле для графика */
+.chart-container {
+  width: 100%;
+  min-height: 350px;
+}
+/* Ряд с двумя карточками 50/50 */
+.stats-row {
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+  gap: 24px;
+  margin-top: 24px;
+  box-sizing: border-box;
+}
+
+.stats-card {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.stats-title {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+ 
+.chart-title {
+  position: absolute;
+  top: 20px;
+  left: 28px;
+  z-index: 10;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;}
+
+/* Правая карточка с градиентным бордером */
+.top-merchants-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 28px;
+  padding: 28px 32px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-merchants-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  padding: 2.88px;
+  background: linear-gradient(84.86deg, #27DFFF 0%, #4B6FFD 50%, #8929FF 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Список получателей */
+.merchants-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+  gap: 14px;
+}
+
+.merchant-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.merchant-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+/* Овальные бейджи с суммой */
+.price-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 16px;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+@media (max-width: 900px) {
+  .stats-row {
+    flex-direction: column;
+  }
+}
+
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <header>
+    <div  id="logo"><svg width="189" height="53" viewBox="0 0 199 63" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.557129" y="7.37608" width="195.388" height="55.0128" rx="27.5064" transform="rotate(-2 0.557129 7.37608)" stroke="#FAFAFA" stroke-width="3"/>
+<path d="M31.3497 26.7266L37.3959 26.5155L37.5561 31.1023L31.5099 31.3134L32.1069 48.4097L26.2691 48.6135L25.6721 31.5173L19.8344 31.7211L19.6742 27.1343L25.512 26.9305L25.4901 26.305C25.3154 21.3012 27.7299 18.712 32.9422 18.5299C35.6525 18.4353 37.1338 19.0098 37.1338 19.0098L37.294 23.5966C37.294 23.5966 35.6115 23.2379 33.9436 23.2961C32.0672 23.3616 31.2623 24.2247 31.3279 26.1011L31.3497 26.7266Z" fill="#FAFAFA"/>
+<path d="M44.9049 26.2533L45.6621 47.9363L39.8243 48.1402L39.0671 26.4571L44.9049 26.2533ZM38.4827 21.6764C38.4186 19.8417 39.8673 18.2881 41.702 18.224C43.5368 18.16 45.0903 19.6087 45.1544 21.4434C45.2185 23.2781 43.7697 24.8317 41.935 24.8958C40.1003 24.9598 38.5468 23.5111 38.4827 21.6764Z" fill="#FAFAFA"/>
+<path d="M47.7649 47.8629L47.0077 26.1798L52.6369 25.9832L52.7607 29.5276L52.9692 29.5203C52.9692 29.5203 54.7 25.285 59.4953 25.1175C65.5415 24.9064 67.3478 28.8095 67.5225 33.8132L67.9885 47.1567L62.1507 47.3605L61.7285 35.268C61.5974 31.5152 60.4967 29.8837 57.7863 29.9783C54.659 30.0875 53.0566 32.0222 53.2095 36.4005L53.6026 47.659L47.7649 47.8629Z" fill="#FAFAFA"/>
+<path d="M69.6239 40.0022L75.2531 39.8056C75.2531 39.8056 75.3842 43.5585 79.971 43.3983C83.0984 43.2891 83.8814 41.8005 83.8377 40.5496C83.6775 35.9628 70.0409 39.9877 69.7496 31.648C69.6186 27.8952 73.0537 24.644 78.8915 24.4402C87.2311 24.149 88.6495 28.9006 88.7223 30.9855L83.0931 31.1821C83.0931 31.1821 82.9911 28.2632 79.0298 28.4015C76.7364 28.4816 75.5262 29.6928 75.5728 31.0272C75.7039 34.78 89.3696 31.5891 89.6536 39.7203C89.7992 43.8901 86.364 47.1412 80.1093 47.3596C71.5612 47.6581 69.7113 42.5041 69.6239 40.0022Z" fill="#FAFAFA"/>
+<path d="M90.7491 35.5071C90.5278 29.169 94.0598 23.9105 101.19 23.6615C108.321 23.4125 111.794 28.4263 112.015 34.7645C112.033 35.2648 112.017 36.0169 112.017 36.0169L96.6723 36.5527C97.0389 39.8798 98.544 42.3322 102.047 42.2099C105.591 42.0861 106.1 38.7284 106.1 38.7284L111.938 38.5246C111.938 38.5246 110.956 46.2824 101.991 46.5955C94.6939 46.8503 90.9705 41.8452 90.7491 35.5071ZM101.343 28.0398C98.4659 28.1403 97.1152 30.1079 96.708 32.7941L105.923 32.4723C105.455 29.8167 104.22 27.9393 101.343 28.0398Z" fill="#FAFAFA"/>
+<path d="M114.262 45.5408L113.505 23.8577L119.134 23.6611L119.258 27.2055L119.466 27.1982C119.466 27.1982 121.197 22.9628 125.992 22.7954C132.039 22.5842 133.845 26.4873 134.02 31.4911L134.486 44.8345L128.648 45.0384L128.226 32.9459C128.095 29.1931 126.994 27.5616 124.284 27.6562C121.156 27.7654 119.554 29.7001 119.707 34.0784L120.1 45.3369L114.262 45.5408Z" fill="#FAFAFA"/>
+<path d="M136.121 37.6801L141.75 37.4835C141.75 37.4835 141.881 41.2363 146.468 41.0762C149.596 40.967 150.379 39.4784 150.335 38.2274C150.175 33.6406 136.538 37.6655 136.247 29.3259C136.116 25.573 139.551 22.3219 145.389 22.1181C153.728 21.8268 155.147 26.5784 155.22 28.6633L149.59 28.8599C149.59 28.8599 149.488 25.941 145.527 26.0794C143.234 26.1595 142.023 27.3707 142.07 28.705C142.201 32.4579 155.867 29.267 156.151 37.3981C156.296 41.5679 152.861 44.8191 146.607 45.0375C138.058 45.336 136.208 40.182 136.121 37.6801Z" fill="#FAFAFA"/>
+<path d="M157.246 33.185C157.025 26.8468 160.557 21.5884 167.687 21.3394C174.818 21.0904 178.291 26.1042 178.512 32.4423C178.53 32.9427 178.514 33.6947 178.514 33.6947L163.169 34.2306C163.536 37.5577 165.041 40.0101 168.544 39.8878C172.088 39.764 172.597 36.4063 172.597 36.4063L178.435 36.2024C178.435 36.2024 177.453 43.9603 168.488 44.2734C161.191 44.5282 157.468 39.5231 157.246 33.185ZM167.84 25.7177C164.963 25.8181 163.612 27.7858 163.205 30.4719L172.42 30.1501C171.952 27.4945 170.717 25.6172 167.84 25.7177Z" fill="#FAFAFA"/>
+</svg>
+</div>
+    <nav>
+      <a href="#" class="nav-link">
+        <img src="folder-2.svg" alt="Иконка" width="16" height="16">
+        Выписки
+      </a>
+      <a href="#" class="nav-link">
+        <img src="book.svg" alt="Иконка" width="16" height="16">Информация
+      </a>
+      <a href="#" class="btn-tg">
+          <img src="Path-3.svg" alt="Иконка" width="16" height="16">        TG-бот
+      </a>
+    </nav>
+  </header>
+
+
+<div class="ai-finance-banner">
+  <h2 class="ai-finance-title">
+    Ваши финансы<br>
+    проанализировала<br>
+    нейросеть
+  </h2>
+
+  <div class="ai-advice-card">
+    <div class="ai-card-header">
+      <!-- Исходная SVG-иконка -->
+      <svg class="ai-card-icon" width="26" height="26" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M23.5624 9.06249L21.762 10.8629L18.137 7.23791L19.9374 5.43749C20.4449 4.92999 21.0974 4.68832 21.7499 4.68832C22.4024 4.68832 23.0549 4.92999 23.5624 5.43749C24.5653 6.44041 24.5653 8.05957 23.5624 9.06249Z" fill="url(#paint0_linear_42_592)"/>
+        <path d="M20.9161 11.7208L7.85399 24.7708C6.85108 25.7737 5.23191 25.7737 4.22899 24.7708C3.22608 23.7679 3.22608 22.1487 4.22899 21.1458L17.2911 8.09583L20.9161 11.7208Z" fill="url(#paint1_linear_42_592)"/>
+        <path d="M12.023 4.22917L12.5184 2.54959C12.5667 2.39251 12.5184 2.22334 12.4096 2.10251C12.3009 1.98167 12.1075 1.93334 11.9505 1.98167L10.2709 2.47709L8.59129 1.98167C8.43421 1.93334 8.26504 1.98167 8.14421 2.09042C8.02337 2.21126 7.98712 2.38042 8.03546 2.53751L8.51879 4.22917L8.02337 5.90876C7.97504 6.06584 8.02337 6.23501 8.13212 6.35584C8.25296 6.47667 8.42212 6.51292 8.57921 6.46459L10.2709 5.98126L11.9505 6.47667C11.9988 6.48876 12.035 6.50084 12.0834 6.50084C12.2042 6.50084 12.313 6.45251 12.4096 6.36792C12.5305 6.24709 12.5667 6.07792 12.5184 5.92084L12.023 4.22917Z" fill="url(#paint2_linear_42_592)"/>
+        <path d="M7.18971 11.4792L7.68512 9.79959C7.73346 9.6425 7.68512 9.47334 7.57637 9.35251C7.45554 9.23167 7.28637 9.19542 7.12929 9.24376L5.43762 9.72709L3.75804 9.23167C3.60096 9.18334 3.43179 9.23167 3.31096 9.34042C3.19012 9.46126 3.15387 9.63042 3.20221 9.78751L3.68554 11.4792L3.19012 13.1588C3.14179 13.3158 3.19012 13.485 3.29887 13.6058C3.41971 13.7267 3.58887 13.7629 3.74596 13.7146L5.42554 13.2192L7.10512 13.7146C7.14137 13.7267 7.18971 13.7267 7.23804 13.7267C7.35887 13.7267 7.46762 13.6783 7.56429 13.5938C7.68512 13.4729 7.72137 13.3038 7.67304 13.1467L7.18971 11.4792Z" fill="url(#paint3_linear_42_592)"/>
+        <path d="M25.3145 17.5208L25.8099 15.8412C25.8582 15.6842 25.8099 15.515 25.7012 15.3942C25.5803 15.2733 25.4112 15.2371 25.2541 15.2854L23.5745 15.7808L21.8949 15.2854C21.7378 15.2371 21.5687 15.2854 21.4478 15.3942C21.327 15.515 21.2907 15.6842 21.3391 15.8412L21.8345 17.5208L21.3391 19.2004C21.2907 19.3575 21.3391 19.5267 21.4478 19.6475C21.5687 19.7683 21.7378 19.8046 21.8949 19.7562L23.5745 19.2608L25.2541 19.7562C25.2903 19.7683 25.3387 19.7683 25.387 19.7683C25.5078 19.7683 25.6166 19.72 25.7132 19.6354C25.8341 19.5146 25.8703 19.3454 25.822 19.1883L25.3145 17.5208Z" fill="url(#paint4_linear_42_592)"/>
+        <defs>
+          <linearGradient id="paint0_linear_42_592" x1="18.7787" y1="7.89944" x2="88.4055" y2="7.89943" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#27DFFF"/>
+            <stop offset="0.5" stop-color="#4B6FFD"/>
+            <stop offset="1" stop-color="#8929FF"/>
+          </linearGradient>
+          <linearGradient id="paint1_linear_42_592" x1="5.28852" y1="17.1589" x2="201.844" y2="17.1589" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#27DFFF"/>
+            <stop offset="0.5" stop-color="#4B6FFD"/>
+            <stop offset="1" stop-color="#8929FF"/>
+          </linearGradient>
+          <linearGradient id="paint2_linear_42_592" x1="8.47571" y1="4.32289" x2="59.5827" y2="4.32289" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#27DFFF"/>
+            <stop offset="0.5" stop-color="#4B6FFD"/>
+            <stop offset="1" stop-color="#8929FF"/>
+          </linearGradient>
+          <linearGradient id="paint3_linear_42_592" x1="3.64225" y1="11.5648" x2="54.727" y2="11.5648" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#27DFFF"/>
+            <stop offset="0.5" stop-color="#4B6FFD"/>
+            <stop offset="1" stop-color="#8929FF"/>
+          </linearGradient>
+          <linearGradient id="paint4_linear_42_592" x1="21.7884" y1="17.6113" x2="72.7815" y2="17.6113" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#27DFFF"/>
+            <stop offset="0.5" stop-color="#4B6FFD"/>
+            <stop offset="1" stop-color="#8929FF"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <span class="ai-card-title">Совет от ИИ</span>
+    </div>
+    
+    <p class="ai-card-text">
+      Предлагаю оптимизировать оптимизировать оптимизировать оптимизировать оптимизировать оптимизировать оптимизировать оптимизировать оптимизировать оптимизировать оптимизировать
+    </p>
+  </div>
+</div>
+
+<main>
+
+<div class="analytics-section">
+  <!-- Кнопки категорий -->
+  <div class="category-tabs" id="category-tabs">
+    <button class="tab-btn active" data-category="Транспорт" data-title="Транспорт">Транспорт</button>
+    <button class="tab-btn" data-category="Рестораны" data-title="Рестораны">Рестораны</button>
+    <button class="tab-btn" data-category="Одежда" data-title="Одежда">Одежда</button>
+    <button class="tab-btn" data-category="Продукты" data-title="Продукты">Продукты</button>
+    <button class="tab-btn" data-category="Цифровые товары" data-title="Цифровые товары">Цифровые товары</button>
+  </div>
+
+  <!-- Карточка-контейнер для будущего графика -->
+  <div class="chart-card">
+    <h3 class="chart-title" id="chart-title">Расходы на транспорт за год</h3>
+    
+    <!-- Сюда смонтируется библиотека графика -->
+    <div id="chart-container" class="chart-container"></div>
+  </div>
+</div>
+
+<div class="ai-advice-card" id="blockTextLabel">
+    <div class="ai-card-header">
+        <svg class="ai-card-icon" width="26" height="26" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M23.5624 9.06249L21.762 10.8629L18.137 7.23791L19.9374 5.43749C20.4449 4.92999 21.0974 4.68832 21.7499 4.68832C22.4024 4.68832 23.0549 4.92999 23.5624 5.43749C24.5653 6.44041 24.5653 8.05957 23.5624 9.06249Z" fill="url(#paint0_linear_42_592)"/>
+        <path d="M20.9161 11.7208L7.85399 24.7708C6.85108 25.7737 5.23191 25.7737 4.22899 24.7708C3.22608 23.7679 3.22608 22.1487 4.22899 21.1458L17.2911 8.09583L20.9161 11.7208Z" fill="url(#paint1_linear_42_592)"/>
+        <path d="M12.023 4.22917L12.5184 2.54959C12.5667 2.39251 12.5184 2.22334 12.4096 2.10251C12.3009 1.98167 12.1075 1.93334 11.9505 1.98167L10.2709 2.47709L8.59129 1.98167C8.43421 1.93334 8.26504 1.98167 8.14421 2.09042C8.02337 2.21126 7.98712 2.38042 8.03546 2.53751L8.51879 4.22917L8.02337 5.90876C7.97504 6.06584 8.02337 6.23501 8.13212 6.35584C8.25296 6.47667 8.42212 6.51292 8.57921 6.46459L10.2709 5.98126L11.9505 6.47667C11.9988 6.48876 12.035 6.50084 12.0834 6.50084C12.2042 6.50084 12.313 6.45251 12.4096 6.36792C12.5305 6.24709 12.5667 6.07792 12.5184 5.92084L12.023 4.22917Z" fill="url(#paint2_linear_42_592)"/>
+        <path d="M7.18971 11.4792L7.68512 9.79959C7.73346 9.6425 7.68512 9.47334 7.57637 9.35251C7.45554 9.23167 7.28637 9.19542 7.12929 9.24376L5.43762 9.72709L3.75804 9.23167C3.60096 9.18334 3.43179 9.23167 3.31096 9.34042C3.19012 9.46126 3.15387 9.63042 3.20221 9.78751L3.68554 11.4792L3.19012 13.1588C3.14179 13.3158 3.19012 13.485 3.29887 13.6058C3.41971 13.7267 3.58887 13.7629 3.74596 13.7146L5.42554 13.2192L7.10512 13.7146C7.14137 13.7267 7.18971 13.7267 7.23804 13.7267C7.35887 13.7267 7.46762 13.6783 7.56429 13.5938C7.68512 13.4729 7.72137 13.3038 7.67304 13.1467L7.18971 11.4792Z" fill="url(#paint3_linear_42_592)"/>
+        <path d="M25.3145 17.5208L25.8099 15.8412C25.8582 15.6842 25.8099 15.515 25.7012 15.3942C25.5803 15.2733 25.4112 15.2371 25.2541 15.2854L23.5745 15.7808L21.8949 15.2854C21.7378 15.2371 21.5687 15.2854 21.4478 15.3942C21.327 15.515 21.2907 15.6842 21.3391 15.8412L21.8345 17.5208L21.3391 19.2004C21.2907 19.3575 21.3391 19.5267 21.4478 19.6475C21.5687 19.7683 21.7378 19.8046 21.8949 19.7562L23.5745 19.2608L25.2541 19.7562C25.2903 19.7683 25.3387 19.7683 25.387 19.7683C25.5078 19.7683 25.6166 19.72 25.7132 19.6354C25.8341 19.5146 25.8703 19.3454 25.822 19.1883L25.3145 17.5208Z" fill="url(#paint4_linear_42_592)"/>
+        <defs>
+          <linearGradient id="paint0_linear_42_592" x1="18.7787" y1="7.89944" x2="88.4055" y2="7.89943" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#27DFFF"/>
+            <stop offset="0.5" stop-color="#4B6FFD"/>
+            <stop offset="1" stop-color="#8929FF"/>
+          </linearGradient>
+          <linearGradient id="paint1_linear_42_592" x1="5.28852" y1="17.1589" x2="201.844" y2="17.1589" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#27DFFF"/>
+            <stop offset="0.5" stop-color="#4B6FFD"/>
+            <stop offset="1" stop-color="#8929FF"/>
+          </linearGradient>
+          <linearGradient id="paint2_linear_42_592" x1="8.47571" y1="4.32289" x2="59.5827" y2="4.32289" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#27DFFF"/>
+            <stop offset="0.5" stop-color="#4B6FFD"/>
+            <stop offset="1" stop-color="#8929FF"/>
+          </linearGradient>
+          <linearGradient id="paint3_linear_42_592" x1="3.64225" y1="11.5648" x2="54.727" y2="11.5648" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#27DFFF"/>
+            <stop offset="0.5" stop-color="#4B6FFD"/>
+            <stop offset="1" stop-color="#8929FF"/>
+          </linearGradient>
+          <linearGradient id="paint4_linear_42_592" x1="21.7884" y1="17.6113" x2="72.7815" y2="17.6113" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#27DFFF"/>
+            <stop offset="0.5" stop-color="#4B6FFD"/>
+            <stop offset="1" stop-color="#8929FF"/>
+          </linearGradient>
+        </defs>
+      </svg>
+        <span class="ai-card-title">Ответ на запрос</span>
+        
+    </div>
+    <p class="ai-card-text" id="textLabel">Текст текст текст текст</p>
+</div>
+
+<div class="stats-row">
+  <!-- 1. Левая карточка: График динамики баланса -->
+  <div class="chart-card stats-card">
+    <h3 class="chart-title">Динамика баланса</h3>
+    <div id="balance-chart-container" class="chart-container"></div>
+  </div>
+
+  <!-- 2. Правая карточка: Топ 5 с градиентной рамкой -->
+  <div class="top-merchants-card stats-card">
+    <h3 class="stats-title">Топ 5 получателей платежей</h3>
+    
+    <ul class="merchants-list" id="merchants-list">
+      <li class="merchant-item">
+        <span class="merchant-name">1. Kofeinya Lobby</span>
+        <span class="price-pill">5000₽</span>
+      </li>
+      <li class="merchant-item">
+        <span class="merchant-name">2. Транспорт ЕКБ</span>
+        <span class="price-pill">4000₽</span>
+      </li>
+      <li class="merchant-item">
+        <span class="merchant-name">3. Магнит</span>
+        <span class="price-pill">3000₽</span>
+      </li>
+      <li class="merchant-item">
+        <span class="merchant-name">4. Точка брожения</span>
+        <span class="price-pill">2000₽</span>
+      </li>
+      <li class="merchant-item">
+        <span class="merchant-name">5. Монетка</span>
+        <span class="price-pill">1000₽</span>
+      </li>
+    </ul>
+  </div>
+</div>
+
+   
+</main>
+
+
+  <footer class="footer">
+  <div class="footer-container">
+
+      <svg width="62" height="39" viewBox="0 0 122 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.340454" y="4.50739" width="119.398" height="33.6173" rx="16.8086" transform="rotate(-2 0.340454 4.50739)" stroke="#FAFAFA" stroke-width="1.83324"/>
+<path d="M19.1572 16.3321L22.8519 16.2031L22.9498 19.006L19.2551 19.135L19.6199 29.5822L16.0525 29.7068L15.6877 19.2596L12.1204 19.3842L12.0225 16.5813L15.5898 16.4567L15.5765 16.0745C15.4697 13.0168 16.9452 11.4345 20.1303 11.3233C21.7866 11.2655 22.6918 11.6165 22.6918 11.6165L22.7896 14.4194C22.7896 14.4194 21.7615 14.2002 20.7423 14.2358C19.5956 14.2759 19.1038 14.8033 19.1438 15.9499L19.1572 16.3321Z" fill="#FAFAFA"/>
+<path d="M27.4405 16.0429L27.9032 29.293L24.3358 29.4175L23.8731 16.1674L27.4405 16.0429ZM23.516 13.246C23.4769 12.1249 24.3621 11.1755 25.4833 11.1364C26.6045 11.0972 27.5538 11.9825 27.593 13.1037C27.6321 14.2248 26.7468 15.1742 25.6257 15.2133C24.5045 15.2525 23.5552 14.3672 23.516 13.246Z" fill="#FAFAFA"/>
+<path d="M29.1882 29.2481L28.7255 15.998L32.1654 15.8779L32.241 18.0437L32.3684 18.0393C32.3684 18.0393 33.4261 15.4512 36.3564 15.3488C40.0511 15.2198 41.1549 17.6049 41.2617 20.6626L41.5464 28.8165L37.9791 28.9411L37.7211 21.5516C37.641 19.2583 36.9684 18.2613 35.3121 18.3192C33.401 18.3859 32.4218 19.5682 32.5153 22.2437L32.7555 29.1235L29.1882 29.2481Z" fill="#FAFAFA"/>
+<path d="M42.5458 24.4446L45.9857 24.3245C45.9857 24.3245 46.0658 26.6177 48.8687 26.5199C50.7798 26.4531 51.2583 25.5435 51.2316 24.7791C51.1337 21.9762 42.8006 24.4357 42.6226 19.3395C42.5426 17.0462 44.6417 15.0595 48.209 14.9349C53.3052 14.757 54.172 17.6606 54.2165 18.9346L50.7765 19.0548C50.7765 19.0548 50.7143 17.2711 48.2936 17.3556C46.8921 17.4046 46.1526 18.1447 46.1811 18.9601C46.2612 21.2534 54.612 19.3035 54.7855 24.2723C54.8745 26.8204 52.7754 28.8071 48.9532 28.9406C43.7296 29.123 42.5992 25.9734 42.5458 24.4446Z" fill="#FAFAFA"/>
+<path d="M55.455 21.6977C55.3198 17.8246 57.4781 14.6112 61.8354 14.4591C66.1926 14.3069 68.3151 17.3708 68.4503 21.2439C68.461 21.5497 68.4515 22.0092 68.4515 22.0092L59.0745 22.3367C59.2986 24.3698 60.2183 25.8684 62.3587 25.7937C64.5246 25.718 64.8357 23.6662 64.8357 23.6662L68.403 23.5416C68.403 23.5416 67.8032 28.2823 62.3248 28.4736C57.8656 28.6293 55.5903 25.5708 55.455 21.6977ZM61.9288 17.1346C60.1706 17.196 59.3452 18.3984 59.0964 20.0398L64.7277 19.8432C64.4414 18.2204 63.687 17.0732 61.9288 17.1346Z" fill="#FAFAFA"/>
+<path d="M69.8233 27.8291L69.3606 14.579L72.8005 14.4589L72.8762 16.6247L73.0036 16.6203C73.0036 16.6203 74.0613 14.0322 76.9916 13.9298C80.6863 13.8008 81.7901 16.1859 81.8968 19.2436L82.1816 27.3975L78.6143 27.5221L78.3562 20.1326C78.2761 17.8393 77.6035 16.8423 75.9472 16.9002C74.0362 16.9669 73.057 18.1491 73.1504 20.8246L73.3907 27.7045L69.8233 27.8291Z" fill="#FAFAFA"/>
+<path d="M83.1809 23.0256L86.6209 22.9055C86.6209 22.9055 86.701 25.1987 89.5039 25.1009C91.4149 25.0341 91.8934 24.1245 91.8667 23.3601C91.7688 20.5572 83.4358 23.0167 83.2578 17.9205C83.1777 15.6272 85.2768 13.6405 88.8442 13.5159C93.9404 13.338 94.8071 16.2416 94.8516 17.5156L91.4117 17.6357C91.4117 17.6357 91.3494 15.8521 88.9287 15.9366C87.5273 15.9856 86.7877 16.7257 86.8162 17.5411C86.8963 19.8344 95.2472 17.8845 95.4207 22.8533C95.5097 25.4014 93.4105 27.3881 89.5884 27.5215C84.3648 27.704 83.2343 24.5544 83.1809 23.0256Z" fill="#FAFAFA"/>
+<path d="M96.0902 20.2787C95.9549 16.4056 98.1133 13.1922 102.471 13.0401C106.828 12.8879 108.95 15.9518 109.085 19.8249C109.096 20.1307 109.087 20.5902 109.087 20.5902L99.7097 20.9177C99.9337 22.9508 100.853 24.4494 102.994 24.3747C105.16 24.299 105.471 22.2472 105.471 22.2472L109.038 22.1226C109.038 22.1226 108.438 26.8633 102.96 27.0546C98.5007 27.2103 96.2254 24.1518 96.0902 20.2787ZM102.564 15.7156C100.806 15.777 99.9803 16.9794 99.7315 18.6208L105.363 18.4242C105.077 16.8014 104.322 15.6542 102.564 15.7156Z" fill="#FAFAFA"/>
+</svg>
+
+
+    
+    <div class="footer-copy">
+      <span>Разработано командой Not Found</span>
+      <span>на хакатоне УрФУ 2026</span>
+    </div>
+  </div>
+</footer>
+<script src="dataResult.js"></script> 
+<script src="resultMini.js"></script> 
+<script src="result.js"></script> 
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</body>
+</html>
