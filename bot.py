@@ -1,96 +1,10 @@
+import os
 import re
 import asyncio
-
-import uuid
-import threading
-import subprocess
-import time
-from aiohttp import web
-import aiohttp_cors
-import math
-from aiogram.types.web_app_info import WebAppInfo
-
-USER_DATA = {}
-WEBAPP_URL = "https://localhost:8080"
-
-import math
-import numpy as np
-
-def clean_nan(obj):
-    if isinstance(obj, dict):
-        return {k: clean_nan(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
-        return [clean_nan(v) for v in obj]
-    elif isinstance(obj, (float, np.floating)):
-        if math.isnan(obj) or np.isnan(obj) or np.isinf(obj):
-            return None
-    elif not isinstance(obj, (list, dict, str)) and pd.isna(obj):
-        return None
-    return obj
-
-def run_tunnel():
-    global WEBAPP_URL
-    while True:
-        logging.info("Starting localhost.run SSH tunnel...")
-        proc = subprocess.Popen(
-            ['ssh', '-R', '80:localhost:8080', '-o', 'StrictHostKeyChecking=no', 'nokey@localhost.run'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True
-        )
-        for line in iter(proc.stdout.readline, ''):
-            match = re.search(r'https://[a-zA-Z0-9.-]+\.lhr\.life', line)
-            if match:
-                WEBAPP_URL = match.group(0)
-                logging.info(f"New Tunnel URL: {WEBAPP_URL}")
-        proc.wait()
-        logging.warning("Tunnel closed. Restarting in 3s...")
-        time.sleep(3)
-
-async def index(request):
-    session_id = request.query.get('session_id')
-    with open('templates/index.html', 'r') as f:
-        html = f.read()
-    
-    if session_id and session_id in USER_DATA:
-        import json
-        try:
-            data_json = json.dumps(USER_DATA[session_id], ensure_ascii=False)
-            data_json = data_json.replace("</", r"<\/")
-            html = html.replace('window.INITIAL_DATA = null;', f'window.INITIAL_DATA = {data_json};')
-        except Exception as e:
-            logging.error(f"JSON serialization error: {e}")
-            html = html.replace('window.INITIAL_DATA = null;', f'window.INITIAL_DATA = "ERROR: {e}";')
-            
-    return web.Response(text=html, content_type='text/html')
-
-async def get_data(request):
-    session_id = request.query.get('session_id')
-    if not session_id or session_id not in USER_DATA:
-        return web.json_response({"error": "No data found"}, status=404)
-    return web.json_response(USER_DATA[session_id])
-
-async def start_webapp():
-    app = web.Application()
-    app.router.add_get('/', index)
-    app.router.add_get('/api/data', get_data)
-    
-    cors = aiohttp_cors.setup(app, defaults={
-        "*": aiohttp_cors.ResourceOptions(allow_credentials=True, expose_headers="*", allow_headers="*")
-    })
-    for route in list(app.router.routes()):
-        cors.add(route)
-        
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, '0.0.0.0', 8080)
-    await site.start()
-    logging.info("WebApp running on port 8080")
-
 import logging
 import pandas as pd
 from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message, BufferedInputFile, CallbackQuery
+from aiogram.types import Message, BufferedInputFile, CallbackQuery, FSInputFile
 from aiogram.filters import CommandStart
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.context import FSMContext
@@ -119,12 +33,30 @@ dp = Dispatcher(storage=MemoryStorage())
 class GoalForm(StatesGroup):
     amount = State()
 
-import time
-def get_action_keyboard(session_id: str = None):
+def format_telegram_text(text: str) -> str:
+    import html
+    # 1. Escape HTML entities so Telegram HTML parser never fails
+    text = html.escape(text)
+    
+    # 2. Convert headers: ### Heading or ## Heading -> <b>Heading</b>
+    text = re.sub(r'^[ \t]*#{1,6}[ \t]+(.*)$', r'<b>\1</b>', text, flags=re.MULTILINE)
+    
+    # 3. Remove horizontal dividers: --- or ___ or ***
+    text = re.sub(r'^[ \t]*[-*_]{3,}[ \t]*$', '', text, flags=re.MULTILINE)
+    
+    # 4. Convert **bold** -> <b>bold</b>
+    text = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', text)
+    
+    # 5. Convert bullet points: * or - at start of line -> •
+    text = re.sub(r'^[ \t]*[\*\-][ \t]+', '• ', text, flags=re.MULTILINE)
+    
+    # 6. Normalize multiple blank lines to clean double newline
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    
+    return text.strip()
+
+def get_action_keyboard():
     builder = InlineKeyboardBuilder()
-    if session_id:
-        ts = int(time.time())
-        builder.button(text="⚡ Открыть дашборд", web_app=WebAppInfo(url=f"{WEBAPP_URL}?session_id={session_id}&v={ts}"))
     builder.button(text="📊 Категории расходов", callback_data="show_pie")
     builder.button(text="📈 Динамика баланса", callback_data="show_balance")
     builder.button(text="🏢 Топ-5 (Организации)", callback_data="show_payees_org")
@@ -144,7 +76,14 @@ async def cmd_start(message: Message):
         "пожалуйста, объедините их в один файл заранее — я анализирую только один присланный файл за раз.\n\n"
         "Жду вашу выписку!"
     )
-    await message.answer(welcome_text, parse_mode="Markdown")
+    import os
+    from aiogram.types import FSInputFile
+    banner_path = os.path.join(os.path.dirname(__file__), 'assets', 'banner.png')
+    if os.path.exists(banner_path):
+        photo = FSInputFile(banner_path)
+        await message.answer_photo(photo, caption=welcome_text, parse_mode="Markdown")
+    else:
+        await message.answer(welcome_text, parse_mode="Markdown")
 
 @dp.message(F.document)
 async def handle_document(message: Message, state: FSMContext):
@@ -237,27 +176,18 @@ async def handle_document(message: Message, state: FSMContext):
         # Сохраняем данные пользователя в FSM
         df['Date'] = df['Date'].dt.strftime('%Y-%m-%d')
         transactions_dict = df.to_dict('records')
-        session_id = str(uuid.uuid4())
-        
-        payload = clean_nan({
-            "session_id": session_id,
-            "transactions": transactions_dict,
-            **metrics
-        })
-        USER_DATA[session_id] = payload
         
         await state.update_data(
             transactions=transactions_dict,
             initial_balance=initial_balance,
-            metrics=metrics,
-            session_id=session_id
+            metrics=metrics
         )
         
         await msg.edit_text(
             "✅ <b>Данные успешно проанализированы!</b>\n\n"
-            "Вы можете открыть интерактивный дашборд в Mini App или запросить графики и ИИ-анализ прямо в чат:",
+            "Выберите нужный раздел или запросите графики и ИИ-анализ с помощью кнопок ниже:",
             parse_mode="HTML",
-            reply_markup=get_action_keyboard(session_id)
+            reply_markup=get_action_keyboard()
         )
         
     except Exception as e:
@@ -320,7 +250,11 @@ async def handle_callback(callback: CallbackQuery, state: FSMContext):
     elif action == "show_advice":
         msg = await callback.message.answer("🧠 Анализирую ваши привычки и ищу скрытые резервы...")
         advice = generate_financial_advice(df, metrics.get('total_income', 0.0), metrics.get('total_expenses', 0.0))
-        await msg.edit_text(f"💡 Ваш финансовый совет:\n\n{advice}")
+        formatted_advice = format_telegram_text(advice)
+        try:
+            await msg.edit_text(f"💡 <b>Ваш финансовый совет:</b>\n\n{formatted_advice}", parse_mode="HTML")
+        except Exception:
+            await msg.edit_text(f"💡 Ваш финансовый совет:\n\n{advice}")
     elif action == "goal_setup":
         await callback.message.answer(
             "🎯 **На что вы хотите накопить?**\n"
@@ -328,6 +262,7 @@ async def handle_callback(callback: CallbackQuery, state: FSMContext):
             "Например: *Хочу купить машину за 2 000 000 руб через год* или *Нужно 50 000 на отпуск*.", 
             parse_mode="Markdown"
         )
+        await state.update_data(goal_conversation="")
         await state.set_state(GoalForm.amount)
     elif action == "show_all":
         await send_graph(callback.message, df, "pie")
@@ -336,7 +271,11 @@ async def handle_callback(callback: CallbackQuery, state: FSMContext):
         await send_graph(callback.message, df, "payees_person")
         msg = await callback.message.answer("🧠 Генерирую совет...")
         advice = generate_financial_advice(df, metrics.get('total_income', 0.0), metrics.get('total_expenses', 0.0))
-        await msg.edit_text(f"💡 Финансовый совет от ИИ:\n\n{advice}")
+        formatted_advice = format_telegram_text(advice)
+        try:
+            await msg.edit_text(f"💡 <b>Финансовый совет от ИИ:</b>\n\n{formatted_advice}", parse_mode="HTML")
+        except Exception:
+            await msg.edit_text(f"💡 Финансовый совет от ИИ:\n\n{advice}")
 
 @dp.message(GoalForm.amount)
 async def process_goal_amount(message: Message, state: FSMContext):
@@ -359,18 +298,28 @@ async def process_goal_amount(message: Message, state: FSMContext):
     expenses['Amount_Abs'] = expenses['Amount'].abs()
     category_sums = expenses.groupby('Category')['Amount_Abs'].sum().to_dict()
     
+    # Накапливаем контекст диалога по цели (например: "хочу на машину" + "2000000")
+    prev_text = data.get('goal_conversation', "")
+    full_user_text = f"{prev_text} {message.text}".strip()
+    
     msg = await message.answer("🧠 ИИ анализирует ваши расходы, чтобы составить план накопления...")
     
-    answer = process_goal_request(message.text, metrics, category_sums, months)
+    answer = process_goal_request(full_user_text, metrics, category_sums, months)
+    formatted_answer = format_telegram_text(answer)
+    try:
+        await msg.edit_text(f"🎯 <b>Расчет вашей цели:</b>\n\n{formatted_answer}", parse_mode="HTML")
+    except Exception:
+        await msg.edit_text(f"🎯 Расчет вашей цели:\n\n{answer}")
     
-    await msg.edit_text(f"🎯 Расчет вашей цели:\n\n{answer}")
-    
-    # Сбрасываем только состояние, данные остаются
-    await state.set_state(None)
+    # Если нейросеть запросила уточнение (например, не было суммы), сохраняем контекст и оставляем состояние активным
+    if "уточните" in answer.lower() or "какая именно сумма" in answer.lower():
+        await state.update_data(goal_conversation=full_user_text)
+    else:
+        # Расчет успешно завершен — сбрасываем состояние диалога
+        await state.update_data(goal_conversation="")
+        await state.set_state(None)
 
 async def main():
-    threading.Thread(target=run_tunnel, daemon=True).start()
-    await start_webapp()
     while True:
         try:
             logging.info("Starting bot polling...")

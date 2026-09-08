@@ -29,3 +29,12 @@ bot_rollback*
 # OS files
 .DS_Store
 Thumbs.db
+
+# Backups & archives
+backups/
+*.tar.gz
+*.zip
+*.bak
+
+# Temporary test images
+test_*.png

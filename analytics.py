@@ -28,7 +28,7 @@ plt.rcParams.update({
 })
 
 def generate_spending_pie_chart(df: pd.DataFrame) -> io.BytesIO:
-    """Генерирует круговую диаграмму трат по категориям."""
+    """Генерирует круговую диаграмму трат по категориям с выносной легендой без наложения текста."""
     expenses = df[df['Amount'] < 0].copy()
     if expenses.empty:
         return None
@@ -37,22 +37,46 @@ def generate_spending_pie_chart(df: pd.DataFrame) -> io.BytesIO:
     category_sums = expenses.groupby('Category')['Amount_Abs'].sum().sort_values(ascending=False)
     
     if len(category_sums) > 6:
-        top_cats = category_sums[:6].copy() # Copy to avoid SettingWithCopyWarning
+        top_cats = category_sums[:6].copy()
         other_sum = category_sums[6:].sum()
         top_cats['Другое'] = other_sum
         category_sums = top_cats
         
-    plt.figure(figsize=(8, 6))
-    colors = ['#b026ff', '#00f3ff', '#ff2a7a', '#00ff7f', '#ffd700', '#ff8c00', '#555555']
-    wedges, texts, autotexts = plt.pie(
-        category_sums, labels=category_sums.index, autopct='%1.1f%%', 
-        startangle=140, colors=colors, textprops={'color': TEXT_COLOR},
-        wedgeprops={'edgecolor': BG_COLOR, 'linewidth': 2}
+    fig, ax = plt.subplots(figsize=(10, 5.5), facecolor=BG_COLOR)
+    ax.set_facecolor(BG_COLOR)
+    
+    colors = ['#b026ff', '#00f3ff', '#ff2a7a', '#00ff7f', '#ffd700', '#ff8c00', '#777788']
+    total = category_sums.sum()
+    legend_labels = [f"{cat} — {val:,.0f} ₽ ({val/total*100:.1f}%)".replace(',', ' ') for cat, val in category_sums.items()]
+
+    wedges, texts, autotexts = ax.pie(
+        category_sums,
+        autopct=lambda pct: f'{pct:.1f}%' if pct >= 5.0 else '',
+        pctdistance=0.75,
+        startangle=140,
+        colors=colors[:len(category_sums)],
+        textprops={'color': '#ffffff', 'fontsize': 10, 'weight': 'bold'},
+        wedgeprops={'width': 0.52, 'edgecolor': BG_COLOR, 'linewidth': 2}
     )
-    plt.title('Структура расходов', color=TEXT_COLOR, pad=20, fontsize=14)
+
+    # Сумма расходов в центре пончика
+    ax.text(0, 0, f"Всего\n{total:,.0f} ₽".replace(',', ' '), ha='center', va='center', color=TEXT_COLOR, fontsize=12, fontweight='bold')
+
+    leg = ax.legend(
+        wedges, legend_labels,
+        title="Категории трат",
+        loc="center left",
+        bbox_to_anchor=(1, 0, 0.5, 1),
+        frameon=False,
+        fontsize=10,
+        labelcolor='#ffffff'
+    )
+    plt.setp(leg.get_title(), color='#00f3ff', fontweight='bold', fontsize=11)
+
+    plt.title('Структура расходов', color=TEXT_COLOR, pad=15, fontsize=15, weight='bold')
     
     buf = io.BytesIO()
-    plt.savefig(buf, format='png', bbox_inches='tight')
+    plt.savefig(buf, format='png', bbox_inches='tight', facecolor=BG_COLOR)
     plt.close()
     buf.seek(0)
     return buf
