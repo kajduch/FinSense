@@ -97,3 +97,4 @@ python -m http.server 5500 --directory skibidi/front
 ```
 После этого интерфейс доступен в браузере по адресу `http://localhost:5500`.
 
+
