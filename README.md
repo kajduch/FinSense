@@ -1,4 +1,4 @@
- <img width="1920" height="1080" alt="1" src="https://github.com/user-attachments/assets/24281969-c9ac-41f7-b24a-5e8bf116ed46" />
+  <img width="1920" height="1080" alt="1" src="https://github.com/user-attachments/assets/24281969-c9ac-41f7-b24a-5e8bf116ed46" />
 
 FinSense — это Telegram-бот для глубокого финансового анализа банковских выписок (PDF и CSV) с генерацией наглядной инфографики и персональными рекомендациями на базе ИИ.
  
