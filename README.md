@@ -15,7 +15,7 @@ FinSense — это Telegram-бот для глубокого финансово
 ## Стек технологий
 
 - **Python 3.10+**
-- **aiogram 3** — асинхронный фреймворк для Telegram Bot API
+- **aiogram 3** — асинхронный фреймворк для Telegram Bot API 
 - **pandas, pdfplumber** — обработка табличных данных и парсинг PDF
 - **matplotlib** — генерация визуализаций и инфографики прямо в чат
 - **OpenAI-compatible / Gemini API** — интеллектуальный анализ и финансовые рекомендации
